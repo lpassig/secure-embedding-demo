@@ -172,6 +172,19 @@ ENCRYPTED Top-3:
 ✅ Same documents, same order!
 ```
 
+**Tuning:** You can improve overlap by reducing Vault's noise parameters:
+
+```bash
+# Lower noise = better search accuracy (trade-off: slightly less security)
+vault write vector/config/rotate dimension=768 scaling_factor=5.0 approximation_factor=2.0
+```
+
+| Setting | Overlap | Security |
+|---------|---------|----------|
+| `scaling=10, approx=5` | ~68% | Higher |
+| `scaling=5, approx=2` | ~85% | Medium |
+| `scaling=2, approx=1` | ~95% | Lower |
+
 **Conclusion:** You get **usable semantic search** and **strong protection** against embedding inversion at the same time.
 
 ## Requirements

@@ -129,6 +129,35 @@ Response:
 {"data": {"ciphertext": [5.13, -2.4, ...]}}
 ```
 
+## Architecture
+
+```mermaid
+flowchart TB
+    subgraph Ingestion["📥 Ingestion Pipeline"]
+        Doc[Document] --> Embed[GTR Embedder]
+        Embed --> |"raw vector (768-dim)"| Vault[HashiCorp Vault]
+        Vault --> |"encrypted vector"| Qdrant[(Qdrant)]
+    end
+
+    subgraph Query["🔍 Query Pipeline"]
+        Q[User Query] --> QEmbed[GTR Embedder]
+        QEmbed --> |"raw query vector"| QVault[HashiCorp Vault]
+        QVault --> |"encrypted query"| QSearch[Qdrant Search]
+        QSearch --> |"top-k results"| Results[Results]
+    end
+
+    subgraph Attack["🔓 Inversion Attack"]
+        Breach[DB Breach] --> |"leaked vectors"| Vec2Text[vec2text]
+        Vec2Text --> |"RAW vectors"| Recovered["⚠️ Text Recovered"]
+        Vec2Text --> |"ENCRYPTED vectors"| Garbage["✅ Garbage Output"]
+    end
+
+    style Vault fill:#7B42BC,color:#fff
+    style QVault fill:#7B42BC,color:#fff
+    style Garbage fill:#22863a,color:#fff
+    style Recovered fill:#cb2431,color:#fff
+```
+
 ## How It Works
 
 1. **Raw embedding**: `text → GTR model → 768-dim vector`

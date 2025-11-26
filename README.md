@@ -131,31 +131,45 @@ Response:
 
 ## Architecture
 
+### 📥 Ingestion Pipeline
+
 ```mermaid
-flowchart TB
-    subgraph Ingestion["📥 Ingestion Pipeline"]
-        Doc[Document] --> Embed[GTR Embedder]
-        Embed --> |"raw vector (768-dim)"| Vault[HashiCorp Vault]
-        Vault --> |"encrypted vector"| Qdrant[(Qdrant)]
-    end
-
-    subgraph Query["🔍 Query Pipeline"]
-        Q[User Query] --> QEmbed[GTR Embedder]
-        QEmbed --> |"raw query vector"| QVault[HashiCorp Vault]
-        QVault --> |"encrypted query"| QSearch[Qdrant Search]
-        QSearch --> |"top-k results"| Results[Results]
-    end
-
-    subgraph Attack["🔓 Inversion Attack"]
-        Breach[DB Breach] --> |"leaked vectors"| Vec2Text[vec2text]
-        Vec2Text --> |"RAW vectors"| Recovered["⚠️ Text Recovered"]
-        Vec2Text --> |"ENCRYPTED vectors"| Garbage["✅ Garbage Output"]
-    end
-
+flowchart LR
+    Doc[📄 Document] --> Embed[GTR Embedder]
+    Embed --> |"raw vector<br/>(768-dim)"| Vault[🔐 Vault]
+    Vault --> |"encrypted<br/>vector"| Qdrant[(Qdrant)]
+    
     style Vault fill:#7B42BC,color:#fff
-    style QVault fill:#7B42BC,color:#fff
-    style Garbage fill:#22863a,color:#fff
+    style Qdrant fill:#1a73e8,color:#fff
+```
+
+### 🔍 Query Pipeline
+
+```mermaid
+flowchart LR
+    Query[❓ User Query] --> Embed[GTR Embedder]
+    Embed --> |"raw query<br/>vector"| Vault[🔐 Vault]
+    Vault --> |"encrypted<br/>query"| Search[🔎 Qdrant Search]
+    Search --> |"top-k"| Results[📋 Results]
+    
+    style Vault fill:#7B42BC,color:#fff
+    style Search fill:#1a73e8,color:#fff
+```
+
+### 🔓 Inversion Attack (What We Prevent)
+
+```mermaid
+flowchart LR
+    Breach[💀 DB Breach] --> Leaked[Leaked Vectors]
+    
+    Leaked --> |"RAW"| Raw[vec2text]
+    Raw --> Recovered["⚠️ Text Recovered!"]
+    
+    Leaked --> |"ENCRYPTED"| Enc[vec2text]
+    Enc --> Garbage["✅ Garbage Output"]
+    
     style Recovered fill:#cb2431,color:#fff
+    style Garbage fill:#22863a,color:#fff
 ```
 
 ## How It Works

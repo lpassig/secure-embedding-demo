@@ -135,9 +135,14 @@ Response:
 3. **Storage**: `shifted vector → Qdrant`
 4. **Search**: Query is also encrypted, distances preserved
 
-The encryption shifts vectors ~100% from their original position while preserving relative distances, so:
-- ✅ Semantic search still works
-- ✅ Inversion attacks fail
+### Why semantic search still works
+
+- **Same transform for all vectors**: Vault encrypts **both** stored document embeddings and incoming query embeddings with the **same** secret, distance-preserving transform.
+- **Distances are preserved**: For a query \(q\) and document \(x\), the distance in raw space and encrypted space stay close: \(\text{dist}(q, x) \approx \text{dist}(E_k(q), E_k(x))\).
+- **Neighbors stay neighbors**: Because distances are preserved, the **nearest neighbors** in encrypted space are almost the same as in raw space → search quality is retained.
+- **But inversion breaks**: Individual encrypted vectors are shifted ~100% away from their originals and depend on a **secret key**, so inversion models (like vec2text) cannot map them back to text.
+
+So you get **usable semantic search** and **strong protection** against embedding inversion at the same time.
 
 ## Requirements
 

@@ -1,0 +1,37 @@
+# Environment files (contain secrets)
+.env
+.env.local
+.env.*.local
+
+# Docker volumes (if mounted locally)
+data/
+volumes/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Build artifacts
+build/
+dist/
+
+# Go build artifacts (for plugin development)
+vault-vector-dpe
+*.exe
+

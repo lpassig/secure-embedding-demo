@@ -1,0 +1,44 @@
+version: "3.9"
+
+networks:
+  rag-stack:
+    driver: bridge
+
+volumes:
+  qdrant_data:
+
+services:
+  # ─────────────────────────────────────────────────────────────
+  # Qdrant - Vector Database
+  # ─────────────────────────────────────────────────────────────
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: qdrant
+    restart: unless-stopped
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    networks:
+      - rag-stack
+
+  # ─────────────────────────────────────────────────────────────
+  # HashiCorp Vault - Vector DPE Plugin (Scale-and-Perturb)
+  # ─────────────────────────────────────────────────────────────
+  vault:
+    build:
+      context: ./vault
+      dockerfile: Dockerfile
+    container_name: vault
+    restart: unless-stopped
+    ports:
+      - "8200:8200"
+    cap_add:
+      - IPC_LOCK
+    environment:
+      - VAULT_ADDR=http://127.0.0.1:8200
+      - VAULT_API_ADDR=http://vault:8200
+    networks:
+      - rag-stack
+    command: server -dev -dev-root-token-id=root -dev-listen-address=0.0.0.0:8200 -dev-plugin-dir=/vault/plugins
